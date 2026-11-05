@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proyecto TEO — Coaching 1 a 1</title>
+<meta name="description" content="Coaching de gimnasio 1 a 1: rutinas personalizadas, guía en video y acompañamiento real por WhatsApp.">
+<link rel="icon" href="assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- fixed chrome -->
+<div class="chrome-logo">
+  <div class="chrome-logo-title">PROYECTO TEO</div>
+  <div class="chrome-logo-sub">Transforma - Enfócate - Optimiza</div>
+</div>
+
+<div class="chrome-dots">
+  <div class="chrome-dots-list" id="dots"></div>
+</div>
+
+<div class="chrome-label" id="activeLabel">01 / Hola, soy Teo</div>
+
+<!-- Scene 1: Hallway -->
+<section class="scene" data-scene-index="0" data-screen-label="Hallway">
+  <div class="scene-stage" data-role="stage">
+    <img class="scene-bg" data-role="bg" src="assets/img/hero-zone.webp" alt="Pasillo del gimnasio">
+    <img class="hero-figure" src="assets/img/hero-person.webp" alt="Atleta">
+    <div class="scene-veil hero-veil"></div>
+    <div class="scene-content hero-content" data-role="content">
+      <h1 class="hero-title">Tu mejor versión no llega sola,<br>la construimos juntos.</h1>
+      <p class="hero-sub">Proyecto TEO es un coaching 1 a 1 para transformar tu físico, tus hábitos y tu enfoque — con rutinas personalizadas, guía en video y acompañamiento real por WhatsApp, estés donde estés.</p>
+    </div>
+    <div class="scroll-hint" data-role="scrollhint">
+      <div class="scroll-hint-label">SCROLL</div>
+      <div class="scroll-hint-track"><div class="scroll-hint-dot"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Scene 2: Cardio -->
+<section class="scene" data-scene-index="1" data-screen-label="Cardio">
+  <div class="scene-stage" data-role="stage">
+    <img class="scene-bg" data-role="bg" src="assets/img/cardio-zone.webp" alt="Zona de cardio">
+    <div class="scene-veil cardio-veil"></div>
+    <div class="cardio-layout scene-content" data-role="content">
+      <div class="cardio-left">
+        <div class="cardio-stage">
+          <div class="cube-stack">
+            <button type="button" class="cube-float" data-cube="T" data-active="false" aria-label="Ver detalle de Transforma">
+              <div class="cube-floater"><img class="cube-img" src="assets/img/cube-t.webp" alt="Cubo T"></div>
+            </button>
+            <button type="button" class="cube-float" data-cube="E" data-active="false" aria-label="Ver detalle de Enfócate">
+              <div class="cube-floater"><img class="cube-img" src="assets/img/cube-e.webp" alt="Cubo E"></div>
+            </button>
+            <button type="button" class="cube-float" data-cube="O" data-active="false" aria-label="Ver detalle de Optimiza">
+              <div class="cube-floater"><img class="cube-img" src="assets/img/cube-o.webp" alt="Cubo O"></div>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="cardio-right">
+        <div class="feature-card" data-card="T" tabindex="0" role="button" aria-expanded="false" aria-label="Transforma — desplegar detalle">
+          <div class="feature-card-head">
+            <div class="feature-card-tag">T</div>
+            <h3 class="feature-card-title">Transforma</h3>
+            <svg class="feature-card-chevron" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <div class="feature-card-copy-wrap">
+            <p class="feature-card-copy">Rutina personalizada según tu objetivo, nivel y equipo disponible. Subir masa, definir o empezar desde cero — con videos de ejecución para entrenar con técnica desde el día uno.</p>
+          </div>
+        </div>
+        <div class="feature-card" data-card="E" tabindex="0" role="button" aria-expanded="false" aria-label="Enfócate — desplegar detalle">
+          <div class="feature-card-head">
+            <div class="feature-card-tag">E</div>
+            <h3 class="feature-card-title">Enfócate</h3>
+            <svg class="feature-card-chevron" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <div class="feature-card-copy-wrap">
+            <p class="feature-card-copy">Acompañamiento cercano por WhatsApp y videollamadas semanales. Hábitos, mentalidad y consistencia: el coaching que evita que abandones a la tercera semana.</p>
+          </div>
+        </div>
+        <div class="feature-card" data-card="O" tabindex="0" role="button" aria-expanded="false" aria-label="Optimiza — desplegar detalle">
+          <div class="feature-card-head">
+            <div class="feature-card-tag">O</div>
+            <h3 class="feature-card-title">Optimiza</h3>
+            <svg class="feature-card-chevron" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <div class="feature-card-copy-wrap">
+            <p class="feature-card-copy">Tu plan evoluciona contigo: rutina nueva cada mes, ajustes con criterio y un e-book de recetas fit para sostener el cambio sin dietas imposibles.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Scene 3: Testimonios -->
+<section class="scene" data-scene-index="2" data-screen-label="Testimonios">
+  <div class="scene-stage" data-role="stage">
+    <img class="scene-bg" data-role="bg" src="assets/img/training.webp" alt="Entrenamiento">
+    <div class="scene-veil testi-veil"></div>
+    <div class="testi-wrap scene-content" data-role="content">
+      <div class="section-heading">03 &nbsp;—&nbsp; RESULTADOS REALES</div>
+      <h2 class="testi-title">No son promesas.<br>Son resultados.</h2>
+      <p class="testi-sub">Antes y después de personas reales entrenando con el método TEO.</p>
+      <div class="testi-grid">
+        <div class="testi-card">
+          <div class="testi-name">Transformación · Hombre</div>
+          <div class="testi-imgs">
+            <figure><img src="assets/img/before-man.webp" alt="Antes"><figcaption>Antes</figcaption></figure>
+            <figure><img src="assets/img/after-man.webp" alt="Después"><figcaption>Después</figcaption></figure>
+          </div>
+          <p class="testi-quote">"Te comento que hace un mes estaba pensando de 59 a 60 kilos aproximadamente y no podía subir de peso, cuando conocí su asesoría y me enfoque hacer todo bien a entrenar y comer bien note cambios, ayer me pese y ya casi en unos 20 días casi un mes subí 6 kilos estoy pesando ya 66 kilos
+Definitivamente no me arrepiento de haber tomado la decisión de hacer las cosas bien 😭😭😭
+Gracias por la asesoría y por ayudar a cambiar la vida de varias personas con respecto a su físico, mentalidad 😁"</p>
+        </div>
+        <div class="testi-card">
+          <div class="testi-name">Transformación · Mujer</div>
+          <div class="testi-imgs">
+            <figure><img src="assets/img/before-woman.webp" alt="Antes"><figcaption>Antes</figcaption></figure>
+            <figure><img src="assets/img/after-woman.webp" alt="Después"><figcaption>Después</figcaption></figure>
+          </div>
+          <p class="testi-quote">"Entrenar se ha vuelto para mi una experiencia increíblemente gratificante. Los programas de entrenamiento personalizados han transformado mi cuerpo de una manera que nunca imaginé. Me siento más fuerte, más en forma y con más energía que nunca. ¡Estoy realmente agradecida por los resultados que he logrado hasta el día de hoy!"</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Scene 4: Planes -->
+<section class="scene" data-scene-index="3" data-screen-label="Planes">
+  <div class="scene-stage" data-role="stage">
+    <img class="scene-bg" data-role="bg" src="assets/img/free-weight-zone.webp" alt="Planes">
+    <div class="scene-veil plan-veil"></div>
+    <div class="plan-wrap scene-content" data-role="content">
+      <div class="section-heading">04 &nbsp;—&nbsp; PLANES</div>
+      <h2 class="plan-title">Elige tu punto de partida.</h2>
+      <p class="plan-sub">Sin letra pequeña. Escoges tu plan, me escribes por WhatsApp y arrancamos.</p>
+      <div class="plan-grid">
+        <div class="plan-card">
+          <div class="plan-name">Plus</div>
+          <div class="plan-price">$149.900<span> COP / mes</span></div>
+          <div class="plan-perday">Menos de $5.000 al día</div>
+          <ul class="plan-features">
+            <li>Rutina personalizada (1 mes)</li>
+            <li>Guía interactiva + videos de ejecución</li>
+            <li>Soporte por WhatsApp</li>
+            <li>E-book de recetas fit</li>
+          </ul>
+          <a href="https://wa.me/573024195551?text=Hola%20Teo%2C%20quiero%20empezar%20con%20el%20plan%20Plus" class="plan-cta">EMPEZAR CON PLUS</a>
+        </div>
+        <div class="plan-card is-featured">
+          <div class="plan-badge">Recomendado · Mejor valor</div>
+          <div class="plan-name">Diamante</div>
+          <div class="plan-price">$399.900<span> COP / 3 meses</span></div>
+          <div class="plan-perday">Menos de $4.500 al día · videollamada semanal</div>
+          <ul class="plan-features">
+            <li>3 rutinas, una nueva cada mes</li>
+            <li>Guía interactiva + videos de ejecución</li>
+            <li>Videollamada semanal con Teo</li>
+            <li>Soporte prioritario por WhatsApp</li>
+            <li>E-book de recetas fit</li>
+          </ul>
+          <a href="https://wa.me/573024195551?text=Hola%20Teo%2C%20quiero%20empezar%20con%20el%20plan%20Diamante" class="plan-cta">QUIERO EL DIAMANTE</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Scene 5: CTA -->
+<section class="scene" data-scene-index="4" data-screen-label="CTA">
+  <div class="scene-stage" data-role="stage">
+    <img class="scene-bg" data-role="bg" src="assets/img/cta-zone.webp" alt="Empieza ahora" style="filter: brightness(0.5);">
+    <div class="scene-veil cta-veil"></div>
+    <div class="cta-content scene-content" data-role="content">
+      <div class="cta-eyebrow">05 &nbsp;—&nbsp; EMPEZAR</div>
+      <h2 class="cta-title">Conviértete en tu<br>mejor versión.</h2>
+      <a class="cta-button" id="ctaButton" href="https://wa.me/573024195551?text=Hola%20Teo%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n%20sobre%20el%20programa">ESCRÍBEME POR WHATSAPP</a>
+      <div class="cta-footer">TEO &nbsp;·&nbsp; Transforma. Enfócate. Optimiza.</div>
+    </div>
+  </div>
+</section>
+
+<script src="js/main.js"></script>
+</body>
+</html>

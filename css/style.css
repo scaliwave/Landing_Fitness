@@ -1,0 +1,318 @@
+:root {
+  --bg: #090909;
+  --fg: #f5f5f5;
+  --accent: #4cc9ff;
+  --muted: #b8b8b8;
+  --dim: #6b6b6b;
+  --card-bg: rgba(10, 10, 14, .55);
+  --card-border: rgba(86, 175, 255, .18);
+  --font: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+}
+
+html, body { margin: 0; background: var(--bg); }
+* { box-sizing: border-box; }
+::selection { background: var(--accent); color: var(--bg); }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  position: relative;
+  overflow-x: hidden;
+}
+
+img { max-width: 100%; }
+
+@keyframes scrollDot {
+  0% { transform: translateY(0); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translateY(16px); opacity: 0; }
+}
+
+/* ---------- fixed chrome ---------- */
+.chrome-logo {
+  position: fixed; top: clamp(20px, 4vh, 36px); left: clamp(20px, 5vw, 44px); z-index: 50;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.chrome-logo-title { font-size: clamp(12px, 1.6vw, 15px); font-weight: 500; letter-spacing: 0.28em; color: var(--fg); }
+.chrome-logo-sub { font-size: clamp(8px, 1vw, 10px); font-weight: 300; letter-spacing: 0.18em; color: var(--dim); }
+
+.chrome-dots {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 50;
+  display: flex; align-items: center; padding-right: clamp(14px, 3vw, 28px);
+}
+.chrome-dots-list { display: flex; flex-direction: column; gap: 18px; }
+.dot {
+  width: 6px; height: 14px; border-radius: 3px; background: rgba(255, 255, 255, 0.22);
+  transition: height 0.4s ease, background 0.4s ease, box-shadow 0.4s ease;
+}
+.dot.is-active { height: 28px; background: var(--accent); box-shadow: 0 0 12px rgba(76, 201, 255, 0.7); }
+
+.chrome-label {
+  position: fixed; bottom: clamp(20px, 4vh, 40px); right: clamp(20px, 5vw, 44px); z-index: 50;
+  font-size: clamp(10px, 1.1vw, 11px); font-weight: 300; letter-spacing: 0.15em; color: var(--dim);
+}
+
+/* ---------- scene shell (shared by all 5 scenes) ---------- */
+/* Each scene is taller than the viewport on purpose: the extra height is the scroll
+   "runway" the sticky stage below pins against while the parallax/reveal math in
+   main.js plays out. Losing this height (as happened in an earlier pass) collapses
+   every scene to exactly 100vh, i.e. zero runway — the whole cinematic effect then
+   fires instantly on every scroll tick instead of easing in, which reads as broken/
+   flashing, especially under the fast continuous scroll of a phone.
+
+   No overflow:hidden here (unlike an earlier pass): overflow:hidden on any ancestor
+   of a position:sticky element makes THAT ancestor the sticky element's reference
+   scrollport instead of the real page scroll, and since this box is never itself
+   scrolled directly, the "sticky" stage just sits static and scrolls away with the
+   page — the whole pinned cinematic effect silently stops working. .scene-stage
+   below already clips its own children (bg scale/parallax, content slide-ins), so
+   nothing actually needed clipping at this level. */
+.scene {
+  position: relative; isolation: isolate; margin-top: -2px;
+  height: 140vh; height: 140dvh;
+}
+.scene[data-scene-index="2"], .scene[data-scene-index="3"] { height: 150vh; height: 150dvh; }
+.scene[data-scene-index="4"] { height: 120vh; height: 120dvh; }
+
+.scene-stage {
+  position: sticky; top: 0; width: 100%; overflow: hidden; background: #000;
+  height: 100vh; height: 100dvh;
+  transition: box-shadow 0.8s ease, filter 0.8s ease, transform 0.8s ease, opacity 0.8s ease;
+  transform: translateZ(0);
+  background-image: linear-gradient(180deg, rgba(3, 3, 3, 0.16) 0%, rgba(9, 9, 9, 0.05) 100%);
+}
+.scene-stage::before {
+  content: ''; position: absolute; inset: -4%; pointer-events: none; z-index: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.06) 42%, rgba(0, 0, 0, 0.09) 100%);
+  opacity: 0.22; transform: scale(1.02); transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.scene-stage::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0; opacity: 0.3;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.04) 0%, transparent 24%, transparent 76%, rgba(0, 0, 0, 0.04) 100%);
+}
+.scene-stage > * { position: relative; z-index: 1; }
+
+.scene-bg {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  transform: scale(1); filter: brightness(0.62);
+  transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.9s ease, opacity 0.9s ease;
+  will-change: transform, filter, opacity;
+}
+.scene-veil { position: absolute; inset: 0; }
+
+.scene-content {
+  transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-style: preserve-3d;
+  will-change: transform, opacity, filter;
+  opacity: 0; transform: translateY(40px); filter: blur(8px);
+  z-index: 2;
+}
+
+/* ---------- Scene 1: Hallway ---------- */
+.hero-veil { background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.12) 36%, rgba(9, 9, 9, 0.78) 100%); }
+.hero-content {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+  text-align: left; padding: 0 10vw; max-width: 50ch; overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.hero-title { font-size: clamp(44px, 6vw, 92px); font-weight: 200; letter-spacing: -0.02em; line-height: 1.02; margin: 0; }
+.hero-sub { font-size: 17px; font-weight: 300; color: var(--muted); margin-top: 24px; max-width: 44ch; letter-spacing: 0.01em; line-height: 1.8; }
+
+.hero-figure {
+  position: absolute; bottom: 8vh; right: 6vw; width: min(38vw, 420px); max-height: 84vh; object-fit: contain;
+  transform: translateX(8%); opacity: 0.98; filter: drop-shadow(0 28px 40px rgba(0, 0, 0, 0.35));
+  pointer-events: none; z-index: 2; transition: transform 0.9s ease, opacity 0.9s ease;
+}
+
+.scroll-hint {
+  position: absolute; left: 50%; bottom: 56px; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 10px; transition: opacity 0.6s ease;
+}
+.scroll-hint-label { font-size: 10px; letter-spacing: 0.3em; color: #8a8a8a; }
+.scroll-hint-track { width: 1px; height: 34px; background: rgba(255, 255, 255, 0.18); position: relative; overflow: hidden; }
+.scroll-hint-dot { position: absolute; top: 0; left: 0; width: 100%; height: 10px; background: var(--accent); animation: scrollDot 2s ease-in-out infinite; }
+
+/* ---------- Scene 2: Cardio ---------- */
+.cardio-veil { background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.12) 34%, rgba(9, 9, 9, 0.80) 100%); }
+.cardio-layout {
+  position: absolute; inset: 0; width: min(1200px, 92vw); margin: auto;
+  display: grid; grid-template-columns: var(--cube-size) 1fr; gap: clamp(28px, 4vw, 60px); align-items: center; justify-content: center;
+  --cube-size: clamp(190px, 25vh, 260px);
+}
+.cardio-left { display: flex; justify-content: center; align-items: center; }
+.cardio-stage { width: 100%; display: flex; justify-content: center; }
+
+/* All three cubes read their size from --cube-size (set per breakpoint below) — one dial instead of scattered widths. */
+.cube-stack { display: flex; flex-direction: column; gap: 22px; align-items: center; }
+@keyframes cubeFloat {
+  0%   { transform: translateY(0) translateX(0) rotateY(-6deg) rotateX(2deg) rotate(-2deg); }
+  50%  { transform: translateY(-16px) translateX(4px) rotateY(6deg) rotateX(-2deg) rotate(2deg); }
+  100% { transform: translateY(0) translateX(0) rotateY(-6deg) rotateX(2deg) rotate(-2deg); }
+}
+.cube-float {
+  width: var(--cube-size); aspect-ratio: 1; border: none; background: none; cursor: pointer; padding: 0;
+  opacity: 0; transform: translateY(24px);
+  transition: opacity .5s cubic-bezier(.2, .8, .2, 1), transform .5s cubic-bezier(.2, .8, .2, 1);
+}
+.cube-float[data-active="true"] { opacity: 1; transform: translateY(0); }
+.cube-float:nth-child(1) { transition-delay: 0.18s; }
+.cube-float:nth-child(2) { transition-delay: 0.36s; }
+.cube-float:nth-child(3) { transition-delay: 0.54s; }
+.cube-floater { animation: cubeFloat 5.5s ease-in-out infinite; transform-style: preserve-3d; width: 100%; height: 100%; }
+.cube-float:nth-child(1) .cube-floater { animation-duration: 5.2s; animation-delay: 0s; }
+.cube-float:nth-child(2) .cube-floater { animation-duration: 6.1s; animation-delay: 0.6s; }
+.cube-float:nth-child(3) .cube-floater { animation-duration: 5.7s; animation-delay: 1.2s; }
+.cube-img { width: 100%; height: 100%; object-fit: contain; display: block; transition: .35s; }
+.cube-float:hover .cube-img,
+.cube-float:focus-visible .cube-img,
+.cube-float[data-hover="true"] .cube-img { filter: drop-shadow(0 28px 42px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 42px rgba(76, 201, 255, 0.5)); transform: scale(1.06); }
+.cube-float:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 12px; }
+
+.cardio-right { display: flex; flex-direction: column; gap: 16px; justify-content: center; perspective: 1400px; }
+.cardio-right .feature-card:last-child { margin-bottom: 0; }
+
+.feature-card {
+  width: min(28rem, 100%); min-width: 0; max-width: 100%;
+  padding: clamp(18px, 2.4vw, 22px) clamp(20px, 3vw, 26px); border-radius: 24px;
+  background: var(--card-bg); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+  border: 1px solid var(--card-border); cursor: pointer;
+  --tilt-x: 0deg; --tilt-y: 0deg; opacity: 0; transform: translateY(24px) rotateX(4deg);
+  transition: border-color .35s ease, box-shadow .35s ease, opacity .5s cubic-bezier(.2, .8, .2, 1), transform .45s cubic-bezier(.2, .8, .2, 1);
+}
+.feature-card[data-active="true"] { opacity: 1; transform: translateY(0) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); }
+.feature-card[data-active="true"][data-highlight="true"] { border-color: rgba(76, 201, 255, 0.55); box-shadow: 0 30px 76px rgba(0, 0, 0, 0.32), 0 0 44px rgba(76, 201, 255, 0.14); }
+.feature-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.feature-card:nth-child(1) { transition-delay: 0.26s; }
+.feature-card:nth-child(2) { transition-delay: 0.44s; }
+.feature-card:nth-child(3) { transition-delay: 0.62s; }
+.feature-card-head { display: flex; align-items: center; gap: 16px; }
+.feature-card-tag { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 16px; background: rgba(76, 201, 255, 0.12); border: 1px solid rgba(76, 201, 255, 0.22); color: var(--accent); font-size: 1rem; font-weight: 700; }
+.feature-card-title { flex: 1; font-size: clamp(1.35rem, 1.8vw, 1.85rem); line-height: 1.15; margin: 0; color: #fff; font-weight: 500; }
+.feature-card-chevron { flex: none; width: 20px; height: 20px; stroke: var(--accent); transition: transform .35s ease; }
+.feature-card[data-highlight="true"] .feature-card-chevron { transform: rotate(45deg); }
+/* Grid 0fr->1fr row is what animates the reveal to its natural height without a fixed max-height guess. */
+.feature-card-copy-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .4s cubic-bezier(.2, .8, .2, 1); }
+.feature-card-copy { overflow: hidden; margin: 0; padding-top: 0; font-size: .98rem; line-height: 1.7; color: #c7cbd1; max-width: 48ch; opacity: 0; transition: opacity .25s ease, padding-top .4s ease; }
+.feature-card[data-highlight="true"] .feature-card-copy-wrap { grid-template-rows: 1fr; }
+.feature-card[data-highlight="true"] .feature-card-copy { padding-top: 14px; opacity: 1; transition: opacity .3s ease .1s, padding-top .4s ease; }
+
+.scene.is-active .cube-float { opacity: 1; transform: translateY(0); }
+.scene.is-active .feature-card,
+.scene.is-active .testi-card,
+.scene.is-active .plan-card { opacity: 1; transform: translateY(0) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cube-floater { animation: none; }
+  .cube-float, .feature-card, .testi-card, .plan-card { transition: none !important; opacity: 1 !important; transform: none !important; }
+}
+
+@media (max-width: 980px) {
+  .cardio-layout { grid-template-columns: 1fr 1.2fr; gap: 2.4rem; padding: 8vh 6vw; --cube-size: clamp(150px, 22vh, 210px); }
+}
+@media (max-width: 720px) {
+  .cardio-layout { grid-template-columns: 1fr; gap: 1.75rem; padding: 7vh 5vw; --cube-size: clamp(96px, 24vw, 160px); }
+  .cardio-right { order: 3; }
+  .cardio-left { order: 1; }
+  .cube-stack { width: 100%; align-items: center; gap: 1.2rem; flex-direction: row; justify-content: center; }
+}
+@media (max-width: 540px) {
+  .cardio-layout { --cube-size: clamp(84px, 26vw, 130px); }
+  .feature-card { border-radius: 22px; }
+}
+
+/* ---------- shared section heading + testimonios/planes wraps ---------- */
+.section-heading { font-size: 12px; font-weight: 400; letter-spacing: 0.32em; color: var(--accent); text-transform: uppercase; margin-bottom: 28px; }
+/* overflow-y:auto is a safety net, not the primary fix: font-size/padding tuning below
+   keeps this from being needed on most phones, but no amount of tuning can guarantee a
+   fit across every real device (SE-sized phones, landscape, browser zoom...). Without
+   this, content taller than the 100dvh stage gets silently clipped by its overflow:
+   hidden — with it, the worst case is a short internal scroll instead of missing content. */
+.testi-wrap, .plan-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8vh 6vw; text-align: center; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.testi-title, .plan-title { font-size: clamp(2.2rem, 4.4vw, 3.6rem); font-weight: 200; letter-spacing: -0.02em; color: var(--fg); margin: 0 0 10px; }
+.testi-sub, .plan-sub { font-size: 1rem; color: var(--muted); font-weight: 300; margin: 0 0 44px; max-width: 56ch; line-height: 1.7; }
+
+/* ---------- Scene 3: Testimonios ---------- */
+.testi-veil { background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.28) 30%, rgba(9, 9, 9, 0.9) 100%); }
+.testi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 3vw, 28px); width: min(940px, 94vw); perspective: 1400px; }
+.testi-card {
+  background: var(--card-bg); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border: 1px solid var(--card-border);
+  border-radius: 24px; padding: clamp(18px, 3vw, 26px); text-align: left;
+  --tilt-x: 0deg; --tilt-y: 0deg; opacity: 0; transform: translateY(24px) rotateX(4deg);
+  transition: border-color .35s ease, box-shadow .35s ease, opacity .5s cubic-bezier(.2, .8, .2, 1), transform .45s cubic-bezier(.2, .8, .2, 1);
+}
+.testi-card:nth-child(1) { transition-delay: .1s; }
+.testi-card:nth-child(2) { transition-delay: .22s; }
+.testi-name { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; margin-bottom: 16px; }
+.testi-imgs { display: flex; gap: 10px; margin-bottom: 16px; }
+.testi-imgs figure { flex: 1; margin: 0; position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 3 / 4; }
+.testi-imgs img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.92); }
+.testi-imgs figcaption { position: absolute; left: 8px; bottom: 8px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; background: rgba(0, 0, 0, 0.55); padding: 3px 8px; border-radius: 4px; }
+.testi-quote { font-size: 0.9rem; line-height: 1.7; color: #c7cbd1; margin: 0; font-weight: 300; font-style: italic; }
+
+/* ---------- Scene 4: Planes ---------- */
+.plan-veil { background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 30%, rgba(9, 9, 9, 0.93) 100%); }
+.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 3vw, 26px); width: min(860px, 94vw); align-items: stretch; perspective: 1400px; }
+.plan-card {
+  position: relative; background: var(--card-bg); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border: 1px solid var(--card-border);
+  border-radius: 24px; padding: clamp(22px, 4vw, 34px) clamp(18px, 3.2vw, 28px); text-align: left; display: flex; flex-direction: column;
+  --tilt-x: 0deg; --tilt-y: 0deg; opacity: 0; transform: translateY(24px) rotateX(4deg);
+  transition: border-color .35s ease, box-shadow .35s ease, opacity .5s cubic-bezier(.2, .8, .2, 1), transform .45s cubic-bezier(.2, .8, .2, 1);
+}
+.plan-card:nth-child(1) { transition-delay: .1s; }
+.plan-card:nth-child(2) { transition-delay: .22s; }
+.plan-card.is-featured { border-color: rgba(76, 201, 255, 0.55); box-shadow: 0 30px 76px rgba(0, 0, 0, 0.32), 0 0 44px rgba(76, 201, 255, 0.14); }
+.plan-badge { position: absolute; top: -14px; left: 26px; background: var(--accent); color: var(--bg); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 6px 14px; border-radius: 20px; }
+.plan-name { font-size: 1.3rem; font-weight: 500; color: #fff; margin: 8px 0 6px; }
+.plan-price { font-size: 2rem; font-weight: 300; color: var(--fg); margin: 0; }
+.plan-price span { font-size: 0.85rem; color: #8a8a8a; font-weight: 300; }
+.plan-perday { font-size: 12px; color: var(--accent); font-weight: 400; margin: 6px 0 20px; }
+.plan-features { list-style: none; padding: 0; margin: 0 0 24px; display: flex; flex-direction: column; gap: 9px; }
+.plan-features li { font-size: 0.86rem; color: #c7cbd1; font-weight: 300; padding-left: 22px; position: relative; }
+.plan-features li::before { content: '✓'; position: absolute; left: 0; color: var(--accent); }
+.plan-cta { margin-top: auto; padding: 14px 0; text-align: center; border: 1px solid rgba(76, 201, 255, 0.5); border-radius: 2px; color: var(--fg); font-size: 12px; font-weight: 400; letter-spacing: 0.1em; text-decoration: none; background: rgba(76, 201, 255, 0.06); transition: box-shadow 0.4s ease, transform 0.4s ease, background 0.4s ease; }
+.plan-cta:hover { box-shadow: 0 0 30px rgba(76, 201, 255, 0.3); background: rgba(76, 201, 255, 0.12); }
+
+@media (max-width: 720px) { .testi-grid, .plan-grid { grid-template-columns: 1fr; } }
+
+/* ---------- Scene 5: CTA ---------- */
+.cta-veil { background: linear-gradient(180deg, rgba(9, 9, 9, 0.5) 0%, rgba(9, 9, 9, 0.55) 60%, rgba(9, 9, 9, 0.92) 100%); }
+.cta-content {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 0 24px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.cta-eyebrow { font-size: 12px; font-weight: 400; letter-spacing: 0.32em; color: var(--accent); margin-bottom: 28px; }
+.cta-title { font-size: clamp(38px, 6.8vw, 88px); font-weight: 200; letter-spacing: -0.01em; line-height: 1.1; margin: 0; max-width: 20ch; }
+.cta-button {
+  display: inline-block; margin-top: clamp(32px, 5vh, 48px); padding: clamp(14px, 2.2vw, 18px) clamp(28px, 6vw, 46px);
+  border: 1px solid rgba(76, 201, 255, 0.5); border-radius: 2px; color: var(--fg); font-size: 14px; font-weight: 400;
+  letter-spacing: 0.18em; text-decoration: none; background: rgba(76, 201, 255, 0.06); box-shadow: 0 0 24px rgba(76, 201, 255, 0.15);
+  transition: box-shadow 0.4s ease, transform 0.4s ease, background 0.4s ease;
+}
+.cta-button:hover { box-shadow: 0 0 40px rgba(76, 201, 255, 0.35); background: rgba(76, 201, 255, 0.12); transform: translateY(-2px); }
+.cta-footer { font-size: 12px; font-weight: 300; color: var(--dim); margin-top: 26px; letter-spacing: 0.05em; }
+
+/* ---------- narrow/short phones: titles were getting vertically centered off-screen ----------
+   .hero-content/.testi-wrap/.plan-wrap/.cta-content center their content with flexbox inside a
+   100dvh box that clips overflow. On a tall headline + a short phone viewport, the centered
+   block is taller than the box, so it overflows equally top and bottom and the top (the
+   headline) gets clipped first. Anchoring to the top on mobile means any leftover overflow
+   spills at the bottom instead of eating the title, and the smaller type reduces how often
+   that happens at all. */
+@media (max-width: 640px) {
+  .hero-content, .testi-wrap, .plan-wrap, .cta-content { justify-content: flex-start; padding-top: clamp(64px, 12vh, 100px); }
+  .testi-wrap, .plan-wrap { padding-bottom: 3vh; }
+  .hero-title { font-size: clamp(30px, 9vw, 44px); line-height: 1.1; }
+  .hero-sub { font-size: 14px; margin-top: 14px; line-height: 1.6; }
+  .section-heading { margin-bottom: 12px; }
+  .testi-title, .plan-title { font-size: clamp(1.5rem, 7.5vw, 2.1rem); margin-bottom: 6px; }
+  .testi-sub, .plan-sub { font-size: 0.82rem; margin-bottom: 18px; line-height: 1.5; }
+  .cta-title { font-size: clamp(30px, 10vw, 44px); }
+  .testi-grid, .plan-grid { gap: 12px; }
+  .testi-card, .plan-card { padding: 14px 16px; }
+  .testi-imgs { margin-bottom: 10px; }
+  .testi-imgs figure { aspect-ratio: 4 / 3; }
+  .testi-name { margin-bottom: 10px; }
+  .plan-price { font-size: 1.6rem; }
+  .plan-perday { margin: 4px 0 14px; }
+  .plan-features { margin-bottom: 16px; gap: 6px; }
+}
