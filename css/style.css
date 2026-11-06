@@ -7,6 +7,7 @@
   --card-bg: rgba(10, 10, 14, .55);
   --card-border: rgba(86, 175, 255, .18);
   --font: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --nav-clear: 68px; /* space scene content leaves for the fixed .chrome-logo bar */
 }
 
 html, body { margin: 0; background: var(--bg); }
@@ -31,11 +32,18 @@ img { max-width: 100%; }
 
 /* ---------- fixed chrome ---------- */
 .chrome-logo {
-  position: fixed; top: clamp(20px, 4vh, 36px); left: clamp(20px, 5vw, 44px); z-index: 50;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
   display: flex; flex-direction: column; gap: 4px;
+  padding: 10px clamp(16px, 5vw, 44px);
+  /* Subtle glass: just enough blur to keep the logo legible without distracting from the reading. */
+  background: rgba(9, 9, 9, 0.2);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .chrome-logo { background: rgba(9, 9, 9, 0.9); }
 }
 .chrome-logo-title { font-size: clamp(12px, 1.6vw, 15px); font-weight: 500; letter-spacing: 0.28em; color: var(--fg); }
-.chrome-logo-sub { font-size: clamp(8px, 1vw, 10px); font-weight: 300; letter-spacing: 0.18em; color: var(--dim); }
+.chrome-logo-sub { font-size: clamp(8px, 1vw, 10px); font-weight: 300; letter-spacing: 0.18em; color: var(--muted); }
 
 .chrome-dots {
   position: fixed; top: 0; right: 0; bottom: 0; z-index: 50;
@@ -67,10 +75,14 @@ img { max-width: 100%; }
    scrolled directly, the "sticky" stage just sits static and scrolls away with the
    page — the whole pinned cinematic effect silently stops working. .scene-stage
    below already clips its own children (bg scale/parallax, content slide-ins), so
-   nothing actually needed clipping at this level. */
+   nothing actually needed clipping at this level.
+
+   overflow-x:clip is safe, unlike overflow:hidden: it does not create a scroll container,
+   so sticky keeps working, and it stops sideways page panning on phones. */
 .scene {
   position: relative; isolation: isolate; margin-top: -2px;
   height: 140vh; height: 140dvh;
+  overflow-x: clip;
 }
 .scene[data-scene-index="2"], .scene[data-scene-index="3"] { height: 150vh; height: 150dvh; }
 .scene[data-scene-index="4"] { height: 120vh; height: 120dvh; }
@@ -113,10 +125,18 @@ img { max-width: 100%; }
 .hero-veil { background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.12) 36%, rgba(9, 9, 9, 0.78) 100%); }
 .hero-content {
   position: absolute; inset: 0; display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
-  text-align: left; padding: 0 10vw; max-width: 50ch; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  text-align: left; padding: 0 10vw; max-width: 50ch; overflow: hidden;
 }
-.hero-title { font-size: clamp(44px, 6vw, 92px); font-weight: 200; letter-spacing: -0.02em; line-height: 1.02; margin: 0; }
+.hero-title { font-size: clamp(44px, 6vw, 92px); font-weight: 500; letter-spacing: -0.02em; line-height: 1.02; margin: 0; }
 .hero-sub { font-size: 17px; font-weight: 300; color: var(--muted); margin-top: 24px; max-width: 44ch; letter-spacing: 0.01em; line-height: 1.8; }
+
+/* 50ch is measured at the body font size, so on desktop it left almost no room once the
+   10vw padding was subtracted. Here the text gets the space to the left of .hero-figure. */
+@media (min-width: 721px) {
+  .hero-content { right: auto; width: 62vw; max-width: none; padding: 0 0 0 8vw; }
+  .hero-title { font-size: clamp(44px, 5vw, 80px); line-height: 1.06; text-wrap: balance; }
+  .hero-sub { max-width: 56ch; }
+}
 
 .hero-figure {
   position: absolute; bottom: 8vh; right: 6vw; width: min(38vw, 420px); max-height: 84vh; object-fit: contain;
@@ -222,19 +242,15 @@ img { max-width: 100%; }
 
 /* ---------- shared section heading + testimonios/planes wraps ---------- */
 .section-heading { font-size: 12px; font-weight: 400; letter-spacing: 0.32em; color: var(--accent); text-transform: uppercase; margin-bottom: 28px; }
-/* overflow-y:auto is a safety net, not the primary fix: font-size/padding tuning below
-   keeps this from being needed on most phones, but no amount of tuning can guarantee a
-   fit across every real device (SE-sized phones, landscape, browser zoom...). Without
-   this, content taller than the 100dvh stage gets silently clipped by its overflow:
-   hidden — with it, the worst case is a short internal scroll instead of missing content. */
-.testi-wrap, .plan-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8vh 6vw; text-align: center; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.testi-title, .plan-title { font-size: clamp(2.2rem, 4.4vw, 3.6rem); font-weight: 200; letter-spacing: -0.02em; color: var(--fg); margin: 0 0 10px; }
+.testi-wrap, .plan-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8vh 6vw; text-align: center; overflow: hidden; }
+.testi-title, .plan-title { font-size: clamp(2.2rem, 4.4vw, 3.6rem); font-weight: 500; letter-spacing: -0.02em; color: var(--fg); margin: 0 0 10px; }
 .testi-sub, .plan-sub { font-size: 1rem; color: var(--muted); font-weight: 300; margin: 0 0 44px; max-width: 56ch; line-height: 1.7; }
 
 /* ---------- Scene 3: Testimonios ---------- */
 .testi-veil { background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.28) 30%, rgba(9, 9, 9, 0.9) 100%); }
-.testi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 3vw, 28px); width: min(940px, 94vw); perspective: 1400px; }
+.testi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 3vw, 28px); width: 100%; max-width: 940px; perspective: 1400px; }
 .testi-card {
+  min-width: 0;
   background: var(--card-bg); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border: 1px solid var(--card-border);
   border-radius: 24px; padding: clamp(18px, 3vw, 26px); text-align: left;
   --tilt-x: 0deg; --tilt-y: 0deg; opacity: 0; transform: translateY(24px) rotateX(4deg);
@@ -244,16 +260,16 @@ img { max-width: 100%; }
 .testi-card:nth-child(2) { transition-delay: .22s; }
 .testi-name { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; margin-bottom: 16px; }
 .testi-imgs { display: flex; gap: 10px; margin-bottom: 16px; }
-.testi-imgs figure { flex: 1; margin: 0; position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 3 / 4; }
-.testi-imgs img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.92); }
+.testi-imgs figure { flex: 1; min-width: 0; margin: 0; position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 3 / 4; }
+.testi-imgs img { width: 100%; height: 100%; object-fit: cover; object-position: center 15%; display: block; filter: brightness(0.92); }
 .testi-imgs figcaption { position: absolute; left: 8px; bottom: 8px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; background: rgba(0, 0, 0, 0.55); padding: 3px 8px; border-radius: 4px; }
 .testi-quote { font-size: 0.9rem; line-height: 1.7; color: #c7cbd1; margin: 0; font-weight: 300; font-style: italic; }
 
 /* ---------- Scene 4: Planes ---------- */
 .plan-veil { background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 30%, rgba(9, 9, 9, 0.93) 100%); }
-.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 3vw, 26px); width: min(860px, 94vw); align-items: stretch; perspective: 1400px; }
+.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 3vw, 26px); width: 100%; max-width: 860px; align-items: stretch; perspective: 1400px; }
 .plan-card {
-  position: relative; background: var(--card-bg); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border: 1px solid var(--card-border);
+  min-width: 0; position: relative; background: var(--card-bg); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border: 1px solid var(--card-border);
   border-radius: 24px; padding: clamp(22px, 4vw, 34px) clamp(18px, 3.2vw, 28px); text-align: left; display: flex; flex-direction: column;
   --tilt-x: 0deg; --tilt-y: 0deg; opacity: 0; transform: translateY(24px) rotateX(4deg);
   transition: border-color .35s ease, box-shadow .35s ease, opacity .5s cubic-bezier(.2, .8, .2, 1), transform .45s cubic-bezier(.2, .8, .2, 1);
@@ -278,10 +294,10 @@ img { max-width: 100%; }
 .cta-veil { background: linear-gradient(180deg, rgba(9, 9, 9, 0.5) 0%, rgba(9, 9, 9, 0.55) 60%, rgba(9, 9, 9, 0.92) 100%); }
 .cta-content {
   position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 0 24px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  text-align: center; padding: 0 24px; overflow: hidden;
 }
 .cta-eyebrow { font-size: 12px; font-weight: 400; letter-spacing: 0.32em; color: var(--accent); margin-bottom: 28px; }
-.cta-title { font-size: clamp(38px, 6.8vw, 88px); font-weight: 200; letter-spacing: -0.01em; line-height: 1.1; margin: 0; max-width: 20ch; }
+.cta-title { font-size: clamp(38px, 6.8vw, 88px); font-weight: 500; letter-spacing: -0.01em; line-height: 1.1; margin: 0; max-width: 20ch; }
 .cta-button {
   display: inline-block; margin-top: clamp(32px, 5vh, 48px); padding: clamp(14px, 2.2vw, 18px) clamp(28px, 6vw, 46px);
   border: 1px solid rgba(76, 201, 255, 0.5); border-radius: 2px; color: var(--fg); font-size: 14px; font-weight: 400;
@@ -300,7 +316,7 @@ img { max-width: 100%; }
    that happens at all. */
 @media (max-width: 640px) {
   .hero-content, .testi-wrap, .plan-wrap, .cta-content { justify-content: flex-start; padding-top: clamp(64px, 12vh, 100px); }
-  .testi-wrap, .plan-wrap { padding-bottom: 3vh; }
+  .testi-wrap, .plan-wrap { padding-bottom: 3vh; padding-left: 3vw; padding-right: 3vw; }
   .hero-title { font-size: clamp(30px, 9vw, 44px); line-height: 1.1; }
   .hero-sub { font-size: 14px; margin-top: 14px; line-height: 1.6; }
   .section-heading { margin-bottom: 12px; }
@@ -316,3 +332,35 @@ img { max-width: 100%; }
   .plan-perday { margin: 4px 0 14px; }
   .plan-features { margin-bottom: 16px; gap: 6px; }
 }
+
+/* ---------- Scene 3: compact desktop layout, so the long testimonials can fit one screen ---------- */
+@media (min-width: 901px) {
+  .testi-wrap { padding: 5vh 6vw 4vh; }
+  .testi-wrap .section-heading { margin-bottom: 12px; }
+  .testi-sub { margin-bottom: 20px; }
+  .testi-grid { max-width: 1080px; }
+  .testi-card { padding: 20px 24px; }
+  .testi-name { margin-bottom: 12px; }
+  .testi-imgs { margin-bottom: 12px; }
+  .testi-imgs figure { aspect-ratio: auto; height: clamp(150px, 26vh, 300px); }
+  .testi-quote { font-size: 0.84rem; line-height: 1.55; }
+}
+
+/* Keeps the top of each pinned scene clear of the fixed nav bar. */
+.cardio-layout, .testi-wrap, .plan-wrap { padding-top: max(8vh, var(--nav-clear)); }
+@media (min-width: 641px) { .hero-content, .cta-content { padding-top: var(--nav-clear); } }
+
+/* ---------- Scenes that do not fit the screen: no inner scrollbars ----------
+   main.js adds .is-flow when a scene's content is taller than the screen. The scene then
+   drops the sticky pin and grows with its content, so the normal page scroll reads it. */
+.scene.is-flow { height: auto; }
+.scene.is-flow .scene-stage { position: relative; height: auto; min-height: 100vh; min-height: 100dvh; }
+.scene.is-flow [data-role="content"] {
+  position: relative; inset: auto; min-height: 100vh; min-height: 100dvh; overflow: visible;
+  justify-content: flex-start; padding-top: clamp(84px, 14vh, 120px); padding-bottom: 8vh;
+}
+/* main.js activates a scene by its center, which comes late on a tall scene: show the cards from the start. */
+.scene.is-flow .cube-float { opacity: 1; transform: translateY(0); }
+.scene.is-flow .feature-card,
+.scene.is-flow .testi-card,
+.scene.is-flow .plan-card { opacity: 1; transform: translateY(0) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); }

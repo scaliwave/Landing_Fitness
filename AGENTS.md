@@ -44,6 +44,7 @@ Si agregas, quitas o reordenas escenas, actualiza también el array `LABELS` de 
 ## Puntos delicados
 
 - **Efecto de scroll:** cada `.scene` mide más que la pantalla (120-150 % de su altura) y dentro lleva un `.scene-stage` con `position: sticky`. No reduzcas esas alturas a 100 %, porque el efecto se dispara de golpe.
+- **Sin scroll interno:** ninguna escena debe mostrar una barra propia. `fitScenes()` en `js/main.js` mide cada escena y, si su contenido no cabe en la pantalla, le agrega `.is-flow`: deja de usar `sticky`, crece con su contenido y se lee con el scroll de la página. En esas escenas la altura de 120-150 % no aplica.
 - **`overflow` en ancestros:** no pongas `overflow: hidden` en `.scene` ni en ningún ancestro de `.scene-stage`, porque rompe el `sticky`. El recorte ya lo hace `.scene-stage`.
 - **Rutas relativas:** el sitio se sirve desde el subdirectorio `/Landing_Fitness/`. Usa `assets/...`, nunca `/assets/...`, o los archivos darán 404 en producción.
 - **Móvil:** los cubos y las tarjetas se abren con hover en escritorio y con toque en móvil. Prueba ambos casos, y también pantallas bajas, donde ya hubo contenido recortado.
