@@ -20,8 +20,21 @@
   let cardioActive = false;
   let ticking = false;
 
-  // Phones skip the sideways slide: it pushes each scene off-center and reads as horizontal scroll.
-  const narrowViewport = window.matchMedia('(max-width: 720px)');
+  // Touch and small screens animate only transform and opacity, which keeps finger scrolling smooth.
+  const liteMotion = window.matchMedia('(hover: none), (max-width: 720px)');
+  let wasLite = liteMotion.matches;
+
+  // Kept fixed while scrolling: the height changes as the phone's browser bar hides, which would make the effects jump.
+  let viewportW = window.innerWidth;
+  let viewportH = window.innerHeight;
+
+  const scenes = sections.map((section) => ({
+    section,
+    bg: section.querySelector('[data-role="bg"]'),
+    content: section.querySelector('[data-role="content"]'),
+    hint: section.querySelector('[data-role="scrollhint"]'),
+    stage: section.querySelector('[data-role="stage"]'),
+  }));
 
   // Height the scene's content needs, measured outside its fixed 100dvh box.
   function naturalHeight(section, content) {
@@ -46,11 +59,47 @@
 
   // A scene that does not fit the screen becomes .is-flow (see style.css) instead of scrolling inside itself.
   function fitScenes() {
-    sections.forEach((section) => {
+    scenes.forEach(({ section, content, stage }) => {
       section.classList.remove('is-flow');
-      const content = section.querySelector('[data-role="content"]');
-      const stage = section.querySelector('[data-role="stage"]');
-      section.classList.toggle('is-flow', naturalHeight(section, content) > stage.clientHeight);
+      const available = Math.min(stage.clientHeight, viewportH);
+      section.classList.toggle('is-flow', naturalHeight(section, content) > available);
+    });
+  }
+
+  function applyDesktopMotion({ bg, content, stage }, progress, inP) {
+    const scale = 1 + progress * 0.08;
+    const parallax = (1 - progress) * 12;
+    const slideX = (1 - progress) * 70;
+    bg.style.transform = `perspective(1600px) translate3d(${slideX}px, ${parallax}px, 0) scale(${scale})`;
+    bg.style.filter = `brightness(${0.55 + progress * 0.12})`;
+
+    content.style.opacity = String(inP);
+    content.style.transform = `perspective(1400px) translate3d(${(1 - inP) * -28}px, ${(1 - inP) * 34}px, 0) rotateY(${(1 - inP) * 10}deg)`;
+    content.style.filter = `blur(${(1 - inP) * 8}px)`;
+
+    stage.style.transform = `translate3d(${(1 - progress) * 24}px, 0, 0)`;
+    stage.style.boxShadow = `inset 0 0 0 1px rgba(255,255,255,0.03), 0 ${8 + progress * 10}px ${22 + progress * 12}px rgba(0,0,0,${0.12 + progress * 0.08})`;
+    stage.style.filter = `brightness(${0.86 + progress * 0.08}) saturate(${0.92 + progress * 0.06})`;
+    stage.style.opacity = String(0.92 + progress * 0.06);
+  }
+
+  function applyLiteMotion({ bg, content }, progress, inP) {
+    // The base scale keeps the image covering the screen edges through the whole ±30px slide.
+    const scale = 1 + 60 / viewportW + progress * 0.08;
+    const slideX = (0.5 - progress) * 60;
+    const parallax = (1 - progress) * 12;
+    bg.style.transform = `translate3d(${slideX}px, ${parallax}px, 0) scale(${scale})`;
+
+    content.style.opacity = String(inP);
+    content.style.transform = `translate3d(0, ${(1 - inP) * 34}px, 0)`;
+  }
+
+  // Inline styles from one motion mode must not leak into the other (e.g. on rotating a tablet).
+  function clearMotionStyles() {
+    scenes.forEach(({ bg, content, stage }) => {
+      [bg, content, stage].forEach((el) => {
+        ['transform', 'filter', 'opacity', 'box-shadow'].forEach((prop) => el.style.removeProperty(prop));
+      });
     });
   }
 
@@ -67,58 +116,32 @@
   }
 
   function update() {
-    const vh = window.innerHeight;
-    const allowSlideX = !narrowViewport.matches;
+    const vh = viewportH;
+    const lite = liteMotion.matches;
     let bestIdx = 0;
     let bestDist = Infinity;
 
-    sections.forEach((section, i) => {
-      const rect = section.getBoundingClientRect();
-      const total = rect.height + vh;
-      let progress = (vh - rect.top) / total;
-      progress = Math.max(0, Math.min(1, progress));
+    // Read every position first and write styles afterwards, so the browser only computes layout once per frame.
+    const rects = sections.map((section) => section.getBoundingClientRect());
 
-      const bg = section.querySelector('[data-role="bg"]');
-      const content = section.querySelector('[data-role="content"]');
-      const hint = section.querySelector('[data-role="scrollhint"]');
-      const stage = section.querySelector('[data-role="stage"]');
-
-      if (bg) {
-        const scale = 1 + progress * 0.08;
-        const parallax = (1 - progress) * 12;
-        const slideX = allowSlideX ? (1 - progress) * 70 : 0;
-        bg.style.transform = `perspective(1600px) translate3d(${slideX}px, ${parallax}px, 0) scale(${scale})`;
-        const brightness = 0.55 + progress * 0.12;
-        bg.style.filter = `brightness(${brightness})`;
-      }
-
-      if (content) {
-        // A tall .is-flow scene would reveal too late if this followed its whole height.
-        const reveal = section.classList.contains('is-flow') ? (vh - rect.top) / (vh * 0.68) : progress / 0.28;
-        const inP = Math.max(0, Math.min(1, reveal));
-        content.style.opacity = String(inP);
-        const contentX = allowSlideX ? (1 - inP) * -28 : 0;
-        content.style.transform = `perspective(1400px) translate3d(${contentX}px, ${(1 - inP) * 34}px, 0) rotateY(${(1 - inP) * 10}deg)`;
-        content.style.filter = `blur(${(1 - inP) * 8}px)`;
-      }
-
-      if (stage) {
-        const stageProgress = Math.max(0, Math.min(1, progress));
-        stage.style.setProperty('--scene-progress', String(stageProgress));
-        stage.style.setProperty('--scene-veil-opacity', String(0.7 + stageProgress * 0.2));
-        stage.style.transform = allowSlideX ? `translate3d(${(1 - stageProgress) * 24}px, 0, 0)` : 'none';
-        stage.style.boxShadow = `inset 0 0 0 1px rgba(255,255,255,0.03), 0 ${8 + stageProgress * 10}px ${22 + stageProgress * 12}px rgba(0,0,0,${0.12 + stageProgress * 0.08})`;
-        stage.style.filter = `brightness(${0.86 + stageProgress * 0.08}) saturate(${0.92 + stageProgress * 0.06})`;
-        stage.style.opacity = String(0.92 + stageProgress * 0.06);
-      }
-
-      if (hint) {
-        hint.style.opacity = String(Math.max(0, 1 - progress / 0.12));
-      }
-
+    scenes.forEach((scene, i) => {
+      const rect = rects[i];
       const center = rect.top + rect.height / 2;
       const dist = Math.abs(center - vh / 2);
       if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+
+      // Scenes far from the screen are not visible, so they do not need styles this frame.
+      if (rect.bottom < -vh * 0.5 || rect.top > vh * 1.5) return;
+
+      const progress = Math.max(0, Math.min(1, (vh - rect.top) / (rect.height + vh)));
+      // A tall .is-flow scene would reveal too late if this followed its whole height.
+      const reveal = scene.section.classList.contains('is-flow') ? (vh - rect.top) / (vh * 0.68) : progress / 0.28;
+      const inP = Math.max(0, Math.min(1, reveal));
+
+      if (lite) applyLiteMotion(scene, progress, inP);
+      else applyDesktopMotion(scene, progress, inP);
+
+      if (scene.hint) scene.hint.style.opacity = String(Math.max(0, 1 - progress / 0.12));
     });
 
     sections.forEach((section, i) => section.classList.toggle('is-active', i === bestIdx));
@@ -148,11 +171,22 @@
 
   // Text and images can change the heights after the first paint.
   function refit() {
+    viewportW = window.innerWidth;
+    viewportH = window.innerHeight;
+    if (liteMotion.matches !== wasLite) {
+      wasLite = liteMotion.matches;
+      clearMotionStyles();
+    }
     fitScenes();
     update();
   }
   window.addEventListener('load', refit);
   if (document.fonts) document.fonts.ready.then(refit);
+
+  // Decoding the backgrounds up front avoids a stall the first time each scene comes into view.
+  scenes.forEach(({ bg }) => {
+    if (bg.decode) bg.decode().catch(() => {});
+  });
 
   // Cubes <-> cards: one card expanded at a time. Desktop previews on hover/focus; a click/tap
   // "pins" a card open (this is what drives it on phones, where there is no hover).

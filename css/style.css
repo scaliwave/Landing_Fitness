@@ -8,6 +8,15 @@
   --card-border: rgba(86, 175, 255, .18);
   --font: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   --nav-clear: 68px; /* space scene content leaves for the fixed .chrome-logo bar */
+  --screen: 100vh;
+}
+@supports (height: 100dvh) {
+  :root { --screen: 100dvh; }
+}
+/* On touch screens dvh changes while the browser bar hides, re-laying out every scene mid-scroll.
+   vh stays fixed, which is what keeps the finger scroll from stuttering. */
+@media (hover: none), (max-width: 720px) {
+  :root { --screen: 100vh; }
 }
 
 html, body { margin: 0; background: var(--bg); }
@@ -81,15 +90,15 @@ img { max-width: 100%; }
    so sticky keeps working, and it stops sideways page panning on phones. */
 .scene {
   position: relative; isolation: isolate; margin-top: -2px;
-  height: 140vh; height: 140dvh;
+  height: calc(var(--screen) * 1.4);
   overflow-x: clip;
 }
-.scene[data-scene-index="2"], .scene[data-scene-index="3"] { height: 150vh; height: 150dvh; }
-.scene[data-scene-index="4"] { height: 120vh; height: 120dvh; }
+.scene[data-scene-index="2"], .scene[data-scene-index="3"] { height: calc(var(--screen) * 1.5); }
+.scene[data-scene-index="4"] { height: calc(var(--screen) * 1.2); }
 
 .scene-stage {
   position: sticky; top: 0; width: 100%; overflow: hidden; background: #000;
-  height: 100vh; height: 100dvh;
+  height: var(--screen);
   transition: box-shadow 0.8s ease, filter 0.8s ease, transform 0.8s ease, opacity 0.8s ease;
   transform: translateZ(0);
   background-image: linear-gradient(180deg, rgba(3, 3, 3, 0.16) 0%, rgba(9, 9, 9, 0.05) 100%);
@@ -350,13 +359,33 @@ img { max-width: 100%; }
 .cardio-layout, .testi-wrap, .plan-wrap { padding-top: max(8vh, var(--nav-clear)); }
 @media (min-width: 641px) { .hero-content, .cta-content { padding-top: var(--nav-clear); } }
 
+/* ---------- Smooth scrolling on touch screens ----------
+   main.js updates these on every scroll frame. A CSS transition on top makes them chase the
+   finger, and animated filters and large backdrop blurs repaint on each frame: both read as
+   stutter on phones. Here only transform and opacity change, which the GPU handles alone. */
+@media (hover: none), (max-width: 720px) {
+  .scene-stage { transition: none; transform: none; }
+  .scene-bg { transition: none; filter: brightness(0.6); will-change: transform; }
+  .scene-content { transition: none; filter: none; will-change: transform, opacity; }
+  .feature-card, .testi-card, .plan-card {
+    background: rgba(10, 10, 14, 0.72); -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+}
+
 /* ---------- Scenes that do not fit the screen: no inner scrollbars ----------
-   main.js adds .is-flow when a scene's content is taller than the screen. The scene then
-   drops the sticky pin and grows with its content, so the normal page scroll reads it. */
+   main.js adds .is-flow when a scene's content is taller than the screen. The scene then grows
+   with its content, so the normal page scroll reads it. Its background and veil stay pinned
+   while the text moves over them, which keeps the same moving-image effect as the other scenes. */
 .scene.is-flow { height: auto; }
-.scene.is-flow .scene-stage { position: relative; height: auto; min-height: 100vh; min-height: 100dvh; }
+/* overflow:clip, unlike hidden, still lets the background inside stick to the page scroll. */
+.scene.is-flow .scene-stage { position: relative; height: auto; min-height: var(--screen); overflow: clip; }
+.scene.is-flow .scene-bg,
+.scene.is-flow .scene-veil {
+  position: sticky; inset: 0 auto auto 0; display: block; width: 100%;
+  height: var(--screen); margin-bottom: calc(var(--screen) * -1);
+}
 .scene.is-flow [data-role="content"] {
-  position: relative; inset: auto; min-height: 100vh; min-height: 100dvh; overflow: visible;
+  position: relative; inset: auto; min-height: var(--screen); overflow: visible; will-change: auto;
   justify-content: flex-start; padding-top: clamp(84px, 14vh, 120px); padding-bottom: 8vh;
 }
 /* main.js activates a scene by its center, which comes late on a tall scene: show the cards from the start. */
@@ -364,3 +393,10 @@ img { max-width: 100%; }
 .scene.is-flow .feature-card,
 .scene.is-flow .testi-card,
 .scene.is-flow .plan-card { opacity: 1; transform: translateY(0) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); }
+
+/* ---------- Footer: above the fixed dots and scene label, which would otherwise cross its text ---------- */
+.site-footer {
+  position: relative; z-index: 51; background: var(--bg); padding: 24px clamp(16px, 5vw, 44px);
+  text-align: center; font-size: 12px; font-weight: 300; line-height: 1.6; letter-spacing: 0.05em; color: var(--muted);
+}
+.site-footer p { margin: 0; }
