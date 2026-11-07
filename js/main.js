@@ -166,6 +166,39 @@
 
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll, { passive: true });
+  // Black Friday: end of November 30 in Colombia. After this the regular prices come back on their own.
+  const PROMO_END = new Date('2026-12-01T00:00:00-05:00').getTime();
+  const promoUnits = {};
+  document.querySelectorAll('[data-promo-unit]').forEach((el) => { promoUnits[el.dataset.promoUnit] = el; });
+
+  function setPromoUnit(name, value) {
+    const text = String(value).padStart(2, '0');
+    if (promoUnits[name].textContent !== text) promoUnits[name].textContent = text;
+  }
+
+  // Returns false once the promotion is over.
+  function updatePromo() {
+    const seconds = Math.ceil((PROMO_END - Date.now()) / 1000);
+    if (seconds <= 0) {
+      document.documentElement.classList.add('promo-ended');
+      return false;
+    }
+    setPromoUnit('days', Math.floor(seconds / 86400));
+    setPromoUnit('hours', Math.floor((seconds % 86400) / 3600));
+    setPromoUnit('minutes', Math.floor((seconds % 3600) / 60));
+    setPromoUnit('seconds', seconds % 60);
+    return true;
+  }
+
+  // Runs before fitScenes, because prices and the banner change how tall the Planes scene is.
+  if (updatePromo()) {
+    const promoTimer = setInterval(() => {
+      if (updatePromo()) return;
+      clearInterval(promoTimer);
+      refit();
+    }, 1000);
+  }
+
   fitScenes();
   update();
 

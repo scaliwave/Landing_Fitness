@@ -4,6 +4,7 @@
   --accent: #4cc9ff;
   --muted: #b8b8b8;
   --dim: #6b6b6b;
+  --promo: #ff5a5f;
   --card-bg: rgba(10, 10, 14, .55);
   --card-border: rgba(86, 175, 255, .18);
   --font: 'Inter', 'Helvetica Neue', Arial, sans-serif;
@@ -393,6 +394,27 @@ img { max-width: 100%; }
 .scene.is-flow .feature-card,
 .scene.is-flow .testi-card,
 .scene.is-flow .plan-card { opacity: 1; transform: translateY(0) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); }
+
+/* ---------- Black Friday: main.js adds .promo-ended to <html> when the promotion ends ---------- */
+.regular-only { display: none; }
+.promo-ended .promo-only { display: none; }
+.promo-ended .regular-only { display: block; }
+.promo-ended .plan-grid { margin-top: 28px; }
+
+.plan-sub { margin-bottom: 16px; }
+.promo-banner {
+  margin: 0 0 26px; padding: 10px 18px; border-radius: 14px; text-align: center;
+  border: 1px solid rgba(255, 90, 95, 0.5); background: rgba(70, 8, 14, 0.72);
+}
+.promo-title { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--promo); }
+.promo-countdown { display: flex; justify-content: center; gap: 14px; }
+.promo-unit { min-width: 44px; display: flex; flex-direction: column; align-items: center; }
+.promo-unit span { font-size: 1.4rem; font-weight: 600; line-height: 1.15; color: #fff; font-variant-numeric: tabular-nums; }
+.promo-unit small { font-size: 10px; letter-spacing: 0.06em; color: var(--muted); }
+
+.plan-old-price { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; margin-bottom: 2px; font-size: 0.85rem; color: var(--muted); }
+.plan-old-price s { margin-left: -6px; font-size: 1rem; font-weight: 500; color: #e4e4e4; text-decoration: line-through 1.5px var(--promo); }
+.plan-save { font-size: 11px; font-weight: 700; color: var(--promo); }
 
 /* ---------- Footer: above the fixed dots and scene label, which would otherwise cross its text ---------- */
 .site-footer {

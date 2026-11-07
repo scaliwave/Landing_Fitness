@@ -141,11 +141,24 @@ Gracias por la asesoría y por ayudar a cambiar la vida de varias personas con r
       <div class="section-heading">04 &nbsp;—&nbsp; PLANES</div>
       <h2 class="plan-title">Elige tu punto de partida.</h2>
       <p class="plan-sub">Sin letra pequeña. Escoges tu plan, me escribes por WhatsApp y arrancamos.</p>
+      <!-- Black Friday: js/main.js hides .promo-only and shows .regular-only when PROMO_END passes. -->
+      <div class="promo-banner promo-only">
+        <p class="promo-title">Aprovecha el Black Friday · Solo hasta el 30 de noviembre</p>
+        <div class="promo-countdown" role="timer" aria-label="Tiempo restante de la promoción">
+          <div class="promo-unit"><span data-promo-unit="days">00</span><small>días</small></div>
+          <div class="promo-unit"><span data-promo-unit="hours">00</span><small>horas</small></div>
+          <div class="promo-unit"><span data-promo-unit="minutes">00</span><small>min</small></div>
+          <div class="promo-unit"><span data-promo-unit="seconds">00</span><small>seg</small></div>
+        </div>
+      </div>
       <div class="plan-grid">
         <div class="plan-card">
           <div class="plan-name">Plus</div>
-          <div class="plan-price">$149.900<span> COP / mes</span></div>
-          <div class="plan-perday">Menos de $5.000 al día</div>
+          <div class="plan-old-price promo-only">Antes <s>$149.900</s><span class="plan-save">Ahorras $25.000</span></div>
+          <div class="plan-price promo-only">$124.900<span> COP / mes</span></div>
+          <div class="plan-perday promo-only">Menos de $4.200 al día</div>
+          <div class="plan-price regular-only">$149.900<span> COP / mes</span></div>
+          <div class="plan-perday regular-only">Menos de $5.000 al día</div>
           <ul class="plan-features">
             <li>Rutina personalizada (1 mes)</li>
             <li>Guía interactiva + videos de ejecución</li>
@@ -157,8 +170,11 @@ Gracias por la asesoría y por ayudar a cambiar la vida de varias personas con r
         <div class="plan-card is-featured">
           <div class="plan-badge">Recomendado · Mejor valor</div>
           <div class="plan-name">Diamante</div>
-          <div class="plan-price">$399.900<span> COP / 3 meses</span></div>
-          <div class="plan-perday">Menos de $4.500 al día · videollamada semanal</div>
+          <div class="plan-old-price promo-only">Antes <s>$399.900</s><span class="plan-save">Ahorras casi $100.000</span></div>
+          <div class="plan-price promo-only">$299.999<span> COP / 3 meses</span></div>
+          <div class="plan-perday promo-only">Menos de $100.000 al mes · videollamada semanal</div>
+          <div class="plan-price regular-only">$399.900<span> COP / 3 meses</span></div>
+          <div class="plan-perday regular-only">Menos de $4.500 al día · videollamada semanal</div>
           <ul class="plan-features">
             <li>3 rutinas, una nueva cada mes</li>
             <li>Guía interactiva + videos de ejecución</li>

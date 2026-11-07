@@ -62,6 +62,14 @@ https://wa.me/573024195551?text=<mensaje codificado para URL>
 - Si cambia el número, actualízalo en los 3 enlaces.
 - Usa `wa.me/<número>`, no un enlace `wa.me/message/...`: cada botón necesita su propio mensaje en `?text=`.
 
+## Promoción Black Friday
+
+La escena de Planes muestra precios de Black Friday hasta el final del 30 de noviembre de 2026, hora de Colombia.
+
+- **Precios promocionales:** Plus a $124.900 (normal: $149.900) y Diamante a $299.999 (normal: $399.900). Están en `index.html`, en los elementos `.promo-only`.
+- **Fin automático:** cuando pasa `PROMO_END` en `js/main.js`, la página agrega `.promo-ended` a `<html>`, oculta `.promo-only` y muestra `.regular-only`, que tiene los precios normales.
+- **Otra promoción:** cambia `PROMO_END`, los textos con la fecha y los precios. No taches un precio que no se haya cobrado de verdad.
+
 ## Ejecutar y verificar
 
 No hay dependencias, compilación ni pruebas automatizadas.
