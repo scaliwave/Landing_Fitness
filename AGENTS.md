@@ -23,6 +23,7 @@ Landing page en español de **Proyecto TEO** ("Transforma - Enfócate - Optimiza
 | `index.html` | Todo el contenido y el marcado de la página |
 | `css/style.css` | Estilos, variables de tema en `:root` y diseño responsive |
 | `js/main.js` | Animaciones ligadas al scroll, navegación por puntos y cubos/tarjetas T.E.O |
+| `js/utm-whatsapp.js` | Agrega la palabra clave del anuncio (`utm_content`) al mensaje de WhatsApp |
 | `assets/img/` | Imágenes en WebP y `favicon.png` |
 | `scripts/optimize-images.py` | Conversión puntual a WebP. Requiere Pillow y una carpeta `uploads/` con los originales, que no está en el repositorio |
 | `.github/workflows/static.yml` | Publicación en GitHub Pages |
@@ -61,6 +62,7 @@ https://wa.me/573024195551?text=<mensaje codificado para URL>
 
 - Si cambia el número, actualízalo en los 3 enlaces.
 - Usa `wa.me/<número>`, no un enlace `wa.me/message/...`: cada botón necesita su propio mensaje en `?text=`.
+- **Trazabilidad de anuncios:** `js/utm-whatsapp.js` lee `?utm_content=` de la URL del anuncio, lo guarda 7 días y, al tocar un botón de WhatsApp, agrega la palabra al final del mensaje, por ejemplo `(ESPALDA)`. No cambia los enlaces del HTML: los modifica en el momento del clic.
 
 ## Promoción Black Friday
 
