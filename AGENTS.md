@@ -63,6 +63,7 @@ https://wa.me/573024195551?text=<mensaje codificado para URL>
 - Si cambia el número, actualízalo en los 3 enlaces.
 - Usa `wa.me/<número>`, no un enlace `wa.me/message/...`: cada botón necesita su propio mensaje en `?text=`.
 - **Trazabilidad de anuncios:** `js/utm-whatsapp.js` lee `?utm_content=` de la URL del anuncio, lo guarda 7 días y, al tocar un botón de WhatsApp, agrega la palabra al final del mensaje, por ejemplo `(ESPALDA)`. No cambia los enlaces del HTML: los modifica en el momento del clic.
+- **Meta Pixel:** el código del píxel (ID `29146696478331076`) está en el `<head>` de `index.html` y registra `PageView`. Al tocar un botón de WhatsApp, `js/utm-whatsapp.js` también envía el evento `Contact` con la palabra del anuncio.
 
 ## Promoción Black Friday
 
