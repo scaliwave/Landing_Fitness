@@ -87,4 +87,7 @@ Después abre http://localhost:8080 y revisa los cambios en escritorio y en móv
 
 ## Publicación
 
+- **Versión en los enlaces:** `index.html` carga `css/style.css`, `js/main.js` y `js/utm-whatsapp.js` con `?v=AAAA-MM-DD`. GitHub Pages deja que el navegador guarde los archivos 10 minutos (y algunos celulares más), así que al cambiar CSS o JS actualiza esa fecha en los tres enlaces; si no, los visitantes pueden ver una mezcla de la versión vieja y la nueva.
+
+
 `static.yml` publica en GitHub Pages con cada push a `main` y sube **todo el repositorio**, no solo el sitio. Cualquier archivo que se agregue queda accesible públicamente en la URL del sitio, así que no incluyas secretos ni archivos privados.
