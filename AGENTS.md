@@ -54,13 +54,14 @@ Si agregas, quitas o reordenas escenas, actualiza también el array `LABELS` de 
 
 ## WhatsApp
 
-Los 3 botones de contacto están en `index.html` (plan Plus, plan Diamante y llamado final) y usan este formato:
+Los 4 botones de contacto están en `index.html` (plan Plus, plan Diamante, llamado final y el botón flotante `#waFloat`) y usan este formato:
 
 ```text
 https://wa.me/573024195551?text=<mensaje codificado para URL>
 ```
 
-- Si cambia el número, actualízalo en los 3 enlaces.
+- Si cambia el número, actualízalo en los 4 enlaces.
+- **Botón flotante:** usa el ícono y el verde oficiales de WhatsApp. En escritorio es un botón redondo abajo a la derecha que muestra "Escríbeme por WhatsApp" al pasar el mouse; en móvil es una barra centrada abajo con el ícono y el texto. `js/main.js` le agrega `.is-hidden` en la última escena, que ya tiene su propio botón. En móvil, el contenido de las escenas deja `--float-clear` libre abajo para que el botón no tape los botones de los planes.
 - Usa `wa.me/<número>`, no un enlace `wa.me/message/...`: cada botón necesita su propio mensaje en `?text=`.
 - **Trazabilidad de anuncios:** `js/utm-whatsapp.js` lee `?utm_content=` de la URL del anuncio, lo guarda 7 días y, al tocar un botón de WhatsApp, agrega la palabra al final del mensaje, por ejemplo `(ESPALDA)`. No cambia los enlaces del HTML: los modifica en el momento del clic.
 - **Meta Pixel:** el código del píxel (ID `29146696478331076`) está en el `<head>` de `index.html` y registra `PageView`. Al tocar un botón de WhatsApp, `js/utm-whatsapp.js` también envía el evento `Contact` con la palabra del anuncio.
@@ -69,7 +70,8 @@ https://wa.me/573024195551?text=<mensaje codificado para URL>
 
 La escena de Planes muestra precios de Black Friday hasta el final del 30 de noviembre de 2026, hora de Colombia.
 
-- **Precios promocionales:** Plus a $124.900 (normal: $149.900) y Diamante a $299.999 (normal: $399.900). Están en `index.html`, en los elementos `.promo-only`.
+- **Precios promocionales:** Plus a $124.900 (normal: $149.900) y Diamante a $299.999 (normal: $399.900). Están en `index.html`, en los elementos `.promo-only`. La primera pantalla también anuncia el precio de Plus (`.hero-offer`) junto al botón "Ver planes", que lleva a `#planes`.
+- **Énfasis visual (negro y dorado):** los colores están en las variables `--gold-*` de `:root` en `css/style.css`. La portada muestra una etiqueta dorada, el botón "Ver planes" dorado metálico y una mini cuenta regresiva (`[data-promo-short]`); al terminar la promoción el botón vuelve al azul. En Planes: banner negro con borde dorado, insignias "17% OFF" y "25% OFF" (`.plan-off`, calculadas sobre los precios normales) y una ráfaga de confeti (`launchConfetti` en `js/main.js`) la primera vez que el banner entra en pantalla. El confeti se dibuja en un `<canvas>` fijo que se borra solo a los ~3,5 s, y no aparece con `prefers-reduced-motion`. Si cambian los precios, recalcula los porcentajes.
 - **Fin automático:** cuando pasa `PROMO_END` en `js/main.js`, la página agrega `.promo-ended` a `<html>`, oculta `.promo-only` y muestra `.regular-only`, que tiene los precios normales.
 - **Otra promoción:** cambia `PROMO_END`, los textos con la fecha y los precios. No taches un precio que no se haya cobrado de verdad.
 

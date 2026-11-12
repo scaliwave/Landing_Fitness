@@ -19,6 +19,8 @@
   let activeIndex = -1;
   let cardioActive = false;
   let ticking = false;
+  const waFloat = document.getElementById('waFloat');
+  let waHidden = false;
 
   // Touch and small screens animate only transform and opacity, which keeps finger scrolling smooth.
   const liteMotion = window.matchMedia('(hover: none), (max-width: 720px)');
@@ -153,6 +155,13 @@
     }
 
     setActiveIndex(bestIdx);
+
+    // The final scene has its own WhatsApp button, so the floating one steps aside there.
+    const nextWaHidden = bestIdx === sections.length - 1;
+    if (waFloat && nextWaHidden !== waHidden) {
+      waHidden = nextWaHidden;
+      waFloat.classList.toggle('is-hidden', waHidden);
+    }
   }
 
   function onScroll() {
@@ -170,6 +179,7 @@
   const PROMO_END = new Date('2026-12-01T00:00:00-05:00').getTime();
   const promoUnits = {};
   document.querySelectorAll('[data-promo-unit]').forEach((el) => { promoUnits[el.dataset.promoUnit] = el; });
+  const promoShort = document.querySelectorAll('[data-promo-short]');
 
   function setPromoUnit(name, value) {
     const text = String(value).padStart(2, '0');
@@ -187,11 +197,103 @@
     setPromoUnit('hours', Math.floor((seconds % 86400) / 3600));
     setPromoUnit('minutes', Math.floor((seconds % 3600) / 60));
     setPromoUnit('seconds', seconds % 60);
+    // The short line under the hero button, e.g. "19d 02h 15m 30s".
+    const pad = (n) => String(n).padStart(2, '0');
+    const short = `${Math.floor(seconds / 86400)}d ${pad(Math.floor((seconds % 86400) / 3600))}h ${pad(Math.floor((seconds % 3600) / 60))}m ${pad(seconds % 60)}s`;
+    promoShort.forEach((el) => { if (el.textContent !== short) el.textContent = short; });
     return true;
+  }
+
+  // One confetti burst from the Black Friday banner. A canvas over the page draws it, so the
+  // page layout is untouched; it runs about 3.5 seconds and then removes itself.
+  function launchConfetti(origin) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'confetti';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.scale(dpr, dpr);
+
+    const colors = ['#c9973b', '#e0b45a', '#f7d58b', '#fff3d1', '#b8862f', '#ffffff'];
+    const count = liteMotion.matches ? 70 : 140;
+    const pieces = Array.from({ length: count }, () => {
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.9; // mostly upwards, fanned out
+      const speed = 10 + Math.random() * 10;
+      return {
+        x: origin.x + (Math.random() - 0.5) * origin.spread,
+        y: origin.y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 5 + Math.random() * 6,
+        rot: Math.random() * Math.PI,
+        vr: (Math.random() - 0.5) * 0.3,
+        tilt: Math.random() * Math.PI,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        round: Math.random() < 0.3,
+      };
+    });
+
+    const start = performance.now();
+    let last = start;
+    function frame(now) {
+      const step = Math.min(2.5, (now - last) / 16.67); // frame-rate independent
+      last = now;
+      const fade = Math.max(0, 1 - Math.max(0, now - start - 2600) / 900);
+      ctx.clearRect(0, 0, w, h);
+      ctx.globalAlpha = fade;
+      pieces.forEach((p) => {
+        // Shoots up, then flutters down slowly like paper: gravity with a capped fall speed and a side sway.
+        p.vy = Math.min(3.2, (p.vy + 0.2 * step) * 0.975 ** step);
+        p.vx *= 0.975 ** step;
+        p.x += (p.vx + Math.sin(p.tilt) * 0.8) * step;
+        p.y += p.vy * step;
+        p.rot += p.vr * step;
+        p.tilt += 0.12 * step;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        if (p.round) {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size / 2.4, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.fillRect(-p.size / 2, -p.size / 4, p.size, (p.size / 2) * Math.abs(Math.cos(p.tilt)) + 1);
+        }
+        ctx.restore();
+      });
+      if (fade > 0) requestAnimationFrame(frame);
+      else canvas.remove();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // Fires once, the first time the banner is well in view.
+  function watchPromoBanner() {
+    const banner = document.querySelector('.promo-banner');
+    if (!banner || !('IntersectionObserver' in window)) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      // A short delay lets the scene's fade-in finish first.
+      setTimeout(() => {
+        if (document.documentElement.classList.contains('promo-ended')) return;
+        const r = banner.getBoundingClientRect();
+        launchConfetti({ x: r.left + r.width / 2, y: r.top + r.height / 2, spread: r.width * 0.8 });
+      }, 350);
+    }, { threshold: 0.9 });
+    observer.observe(banner);
   }
 
   // Runs before fitScenes, because prices and the banner change how tall the Planes scene is.
   if (updatePromo()) {
+    watchPromoBanner();
     const promoTimer = setInterval(() => {
       if (updatePromo()) return;
       clearInterval(promoTimer);
@@ -226,6 +328,16 @@
   const hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let pinnedKey = null;
+
+  // "Ver planes" in the hero: glides to the prices instead of jumping (the #planes href is the fallback).
+  document.querySelectorAll('[data-scroll-to]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const target = document.getElementById(link.dataset.scrollTo);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+    });
+  });
 
   // Phones fire resize when the browser bar hides on scroll, which only changes the height.
   // Ignoring that keeps scenes from switching layout while the user is scrolling.

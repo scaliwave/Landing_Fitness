@@ -1,4 +1,11 @@
 :root {
+  /* Black Friday: black and gold */
+  --gold-deep: #c9973b;
+  --gold: #e0b45a;
+  --gold-light: #f7d58b;
+  --gold-pale: #fff3d1;
+  --gold-ink: #1a1205;
+  --gold-metal: linear-gradient(120deg, #c9973b 0%, #f7d58b 45%, #e0b45a 70%, #c9973b 100%);
   --bg: #090909;
   --fg: #f5f5f5;
   --accent: #4cc9ff;
@@ -403,14 +410,41 @@ img { max-width: 100%; }
 
 .plan-sub { margin-bottom: 16px; }
 .promo-banner {
-  margin: 0 0 26px; padding: 10px 18px; border-radius: 14px; text-align: center;
-  border: 1px solid rgba(255, 90, 95, 0.5); background: rgba(70, 8, 14, 0.72);
+  position: relative; overflow: hidden; margin: 0 0 26px; padding: 12px 22px 14px; border-radius: 16px; text-align: center;
+  background: linear-gradient(135deg, #1a140a 0%, #0c0a06 60%, #17110a 100%);
+  border: 1px solid var(--gold-deep);
+  box-shadow: 0 0 0 1px rgba(247, 213, 139, 0.08) inset, 0 12px 40px rgba(201, 151, 59, 0.2);
 }
-.promo-title { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--promo); }
-.promo-countdown { display: flex; justify-content: center; gap: 14px; }
-.promo-unit { min-width: 44px; display: flex; flex-direction: column; align-items: center; }
-.promo-unit span { font-size: 1.4rem; font-weight: 600; line-height: 1.15; color: #fff; font-variant-numeric: tabular-nums; }
-.promo-unit small { font-size: 10px; letter-spacing: 0.06em; color: var(--muted); }
+/* A light sweep across the banner. Only transform animates, so it stays cheap on phones. */
+.promo-banner::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255, 240, 200, 0.16), transparent);
+  transform: translateX(-120%) skewX(-18deg); animation: promoShine 4s ease-in-out 1s infinite;
+}
+@keyframes promoShine { 0%, 55% { transform: translateX(-120%) skewX(-18deg); } 100% { transform: translateX(320%) skewX(-18deg); } }
+.promo-kicker { margin: 0; font-size: clamp(1.25rem, 2.4vw, 1.6rem); font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-light); line-height: 1.15; }
+.promo-title { margin: 2px 0 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #d9c08a; }
+.promo-countdown { display: flex; justify-content: center; gap: 8px; }
+.promo-unit { min-width: 52px; padding: 5px 4px 4px; border-radius: 10px; background: rgba(201, 151, 59, 0.1); border: 1px solid rgba(201, 151, 59, 0.3); display: flex; flex-direction: column; align-items: center; }
+.promo-unit span { font-size: 1.4rem; font-weight: 700; line-height: 1.15; color: var(--gold-pale); font-variant-numeric: tabular-nums; }
+.promo-unit small { font-size: 10px; letter-spacing: 0.06em; color: #b99a5c; }
+
+/* Discount badge on each plan card. */
+.plan-off {
+  position: absolute; top: -12px; right: 22px; padding: 4px 10px; border-radius: 999px;
+  background: var(--gold-metal); color: var(--gold-ink); font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
+  box-shadow: 0 6px 18px rgba(201, 151, 59, 0.35);
+}
+.promo-ended .plan-off { display: none; }
+/* Narrow phones: next to "Recomendado" there is no room on the top edge, so it moves inside, beside the plan name. */
+@media (max-width: 380px) { .plan-off { top: 14px; right: 14px; } }
+html:not(.promo-ended) .plan-card:not(.is-featured) { border-color: rgba(201, 151, 59, 0.45); }
+html:not(.promo-ended) .plan-card.is-featured { box-shadow: 0 30px 76px rgba(0, 0, 0, 0.32), 0 0 44px rgba(201, 151, 59, 0.2); }
+
+/* Confetti canvas for the moment the offer comes into view (main.js). */
+.confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 55; }
+
+@media (prefers-reduced-motion: reduce) { .promo-banner::after { animation: none; display: none; } }
 
 .plan-old-price { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; margin-bottom: 2px; font-size: 0.85rem; color: var(--muted); }
 .plan-old-price s { margin-left: -6px; font-size: 1rem; font-weight: 500; color: #e4e4e4; text-decoration: line-through 1.5px var(--promo); }
@@ -422,3 +456,87 @@ img { max-width: 100%; }
   text-align: center; font-size: 12px; font-weight: 300; line-height: 1.6; letter-spacing: 0.05em; color: var(--muted);
 }
 .site-footer p { margin: 0; }
+
+/* ---------- Hero offer: shortcut to the prices without scrolling the whole page ---------- */
+.hero-offer { margin: 22px 0 0; }
+.hero-offer-tag {
+  position: relative; overflow: hidden; display: inline-block; white-space: nowrap;
+  padding: 6px 14px; border-radius: 999px; background: #0c0a06; border: 1px solid var(--gold-deep);
+  color: var(--gold-light); font-size: 13px; font-weight: 500; letter-spacing: 0.03em;
+}
+.hero-offer-tag b { font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+.hero-cta {
+  position: relative; overflow: hidden; display: inline-block; margin-top: 18px; padding: 14px 34px; border-radius: 2px;
+  background: var(--gold-metal); color: var(--gold-ink); font-size: 13px; font-weight: 700; letter-spacing: 0.16em; text-decoration: none;
+  box-shadow: 0 8px 26px rgba(201, 151, 59, 0.3);
+  transition: box-shadow 0.4s ease, transform 0.4s ease;
+}
+.hero-cta:hover { box-shadow: 0 10px 34px rgba(201, 151, 59, 0.5); transform: translateY(-2px); }
+/* Metallic glint across the tag and the button. Only transform animates. */
+.hero-offer-tag::after, .hero-cta::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 45%; pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255, 250, 230, 0.6), transparent);
+  transform: translateX(-130%) skewX(-18deg); animation: promoShine 3.6s ease-in-out 1.4s infinite;
+}
+.hero-offer-tag::after { background: linear-gradient(100deg, transparent, rgba(247, 213, 139, 0.3), transparent); }
+.hero-timer { margin: 12px 0 0; font-size: 12px; letter-spacing: 0.04em; color: #e9cf94; font-variant-numeric: tabular-nums; }
+.hero-timer b { font-weight: 700; color: var(--gold-pale); }
+/* Entrance with a small bounce, once on load. */
+.hero-offer-tag, .hero-cta, .hero-timer { animation: heroPop 0.7s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+.hero-offer-tag { animation-delay: 0.3s; }
+.hero-cta { animation-delay: 0.42s; }
+.hero-timer { animation-delay: 0.54s; }
+@keyframes heroPop { from { opacity: 0; transform: translateY(10px) scale(0.92); } to { opacity: 1; transform: none; } }
+/* After Black Friday the button goes back to the site's blue, with no glint. */
+.promo-ended .hero-cta { margin-top: 28px; background: var(--accent); color: var(--bg); box-shadow: none; }
+.promo-ended .hero-cta::after { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-offer-tag, .hero-cta, .hero-timer { animation: none; }
+  .hero-offer-tag::after, .hero-cta::after { display: none; }
+}
+.hero-cta:focus-visible, .wa-float:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
+
+/* ---------- Testimonios: results disclaimer ---------- */
+.testi-note { margin: 16px 0 0; font-size: 12px; font-weight: 300; color: var(--muted); letter-spacing: 0.03em; }
+
+/* ---------- Footer: pixel notice ---------- */
+.site-footer .site-footer-privacy { margin: 6px auto 0; max-width: 70ch; font-size: 11px; color: var(--dim); }
+
+/* ---------- Floating WhatsApp button ----------
+   WhatsApp's own green and glyph, so it reads as the real app. A round button on the right;
+   on desktop the label slides out on hover. Fixed and without backdrop-filter, so it does not
+   repaint the page while scrolling. main.js adds .is-hidden on the final scene, which already
+   has a big WhatsApp button. */
+.wa-float {
+  position: fixed; z-index: 60; right: clamp(20px, 3vw, 36px); bottom: clamp(20px, 4vh, 36px);
+  display: inline-flex; align-items: center; height: 58px; padding: 0 16px; border-radius: 999px;
+  background: #25d366; color: #fff; font-size: 15px; font-weight: 600; text-decoration: none; white-space: nowrap;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+.wa-float-icon { flex: none; width: 26px; height: 26px; }
+.wa-float-label { max-width: 0; overflow: hidden; opacity: 0; transition: max-width 0.35s ease, opacity 0.25s ease, margin 0.35s ease; }
+.wa-float.is-hidden { opacity: 0; transform: translateY(20px); pointer-events: none; }
+@media (hover: hover) and (pointer: fine) {
+  .wa-float:hover, .wa-float:focus-visible { background: #1ebe5b; box-shadow: 0 8px 26px rgba(37, 211, 102, 0.4); }
+  .wa-float:hover .wa-float-label, .wa-float:focus-visible .wa-float-label { max-width: 240px; opacity: 1; margin-left: 10px; }
+}
+/* The scene label sits where the button goes, so it moves above it. */
+.chrome-label { bottom: calc(clamp(20px, 4vh, 36px) + 72px); }
+
+@media (max-width: 720px) {
+  :root { --float-clear: 76px; }
+  /* Phones: a centered bar with the icon and the text, in WhatsApp's own colors. */
+  .wa-float { left: 16px; right: 16px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); height: 54px; justify-content: center; }
+  .wa-float-label { max-width: none; opacity: 1; margin-left: 10px; }
+  .chrome-label { display: none; }
+  .scroll-hint { bottom: calc(var(--float-clear) + 20px); }
+  /* Content leaves room for the bar, so fitScenes() never pins a scene with its last button under it. */
+  .hero-content, .cardio-layout, .testi-wrap, .plan-wrap { padding-bottom: var(--float-clear); }
+  .scene.is-flow [data-role="content"] { padding-bottom: calc(8vh + var(--float-clear)); }
+  .hero-offer { margin-top: 16px; }
+  .hero-offer-tag { font-size: 12px; padding: 5px 12px; }
+  .hero-offer-long { display: none; }
+  .hero-cta { margin-top: 14px; padding: 13px 28px; }
+  .hero-timer { margin-top: 10px; font-size: 11.5px; }
+}
