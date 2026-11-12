@@ -397,6 +397,8 @@ img { max-width: 100%; }
   justify-content: flex-start; padding-top: clamp(84px, 14vh, 120px); padding-bottom: 8vh;
 }
 /* main.js activates a scene by its center, which comes late on a tall scene: show the cards from the start. */
+/* The closing call to action stays centered on its screen, as when it was pinned. */
+.scene.is-flow .cta-content { justify-content: center; padding-top: var(--nav-clear); }
 .scene.is-flow .cube-float { opacity: 1; transform: translateY(0); }
 .scene.is-flow .feature-card,
 .scene.is-flow .testi-card,

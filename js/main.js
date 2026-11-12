@@ -60,7 +60,13 @@
   }
 
   // A scene that does not fit the screen becomes .is-flow (see style.css) instead of scrolling inside itself.
+  // On phones every scene flows: a pinned scene holds the content still while the finger keeps
+  // moving the page, which reads as the scroll fighting back. The background keeps its motion.
   function fitScenes() {
+    if (liteMotion.matches) {
+      scenes.forEach(({ section }) => section.classList.add('is-flow'));
+      return;
+    }
     scenes.forEach(({ section, content, stage }) => {
       section.classList.remove('is-flow');
       const available = Math.min(stage.clientHeight, viewportH);
